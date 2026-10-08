@@ -1,11 +1,12 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'crypto';
 import { User } from './entities/user.entity.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
-
+import { ForgotPasswordDto } from './dto/forgotpassword.dto.js';
+import { ResetPasswordDto } from './dto/resetpassword.dto.js';
 @Injectable()
 export class AuthService {
     constructor(
@@ -61,4 +62,48 @@ export class AuthService {
             user: { id: user.id, name: user.name, email: user.email },
         };
     }
-}
+
+    // FORGOT PASSWORD
+    async forgotPassword(dto: ForgotPasswordDto) {
+        const user = await this.userRepository.findOne({
+            where: { email: dto.email },
+        });
+
+        if (!user) {
+            return { message: 'Jika email terdaftar, instruksi reset telah dikirim.' };
+        }
+
+        const token = randomBytes(32).toString('hex');
+        user.resetToken = createHash('sha256').update(token).digest('hex');
+        user.resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 menit
+        await this.userRepository.save(user);
+
+        return {
+            message: 'Jika email terdaftar, instruksi reset telah dikirim.',
+            token,
+        };
+    }
+
+    // RESET PASSWORD
+    async resetPassword(token: string, dto: ResetPasswordDto) {
+        if (dto.newPassword !== dto.confirmPassword) {
+            throw new BadRequestException('Password dan konfirmasi tidak sama.');
+        }
+
+        const hashedToken = createHash('sha256').update(token).digest('hex');
+        const user = await this.userRepository.findOne({
+            where: { resetToken: hashedToken },
+        });
+
+        if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+            throw new BadRequestException('Token tidak valid atau sudah kedaluwarsa.');
+        }
+
+        user.password = this.hashPassword(dto.newPassword);
+        user.resetToken = null;
+        user.resetTokenExpiry = null;
+        await this.userRepository.save(user);
+
+        return { message: 'Password berhasil direset.' };
+    }
+} 
