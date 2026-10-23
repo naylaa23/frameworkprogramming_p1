@@ -1,37 +1,33 @@
-import { Body, Controller, Delete, Get , Param, Post , Put} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { BooksService } from './books.service.js';
 import { Book } from './entitas/book-entity.js';
 import { CreateBookDto } from './dto/create-book.dto.js';
 
 @Controller('books')
 export class BooksController {
-    
-    constructor(private readonly booksService: BooksService) {}
-    
-    //menampilkan data 
-    @Get()
-    findAll(): Book[] {
-        return this.booksService.findAll();
-    }
+  constructor(private readonly booksService: BooksService) {}
 
-    //menyimpan data
-    @Post()
-    simpanData(@Body() createBookDto: CreateBookDto){
-        return this.booksService.simpanData(createBookDto);
-    }
+  // menampilkan data
+  @Get()
+  async findAll(): Promise<Book[]> {
+    return await this.booksService.findAll();
+  }
 
-    //mengupdate data
-    @Put(':id')
-    updateData(@Param('id') id: string,@Body() createBookDto: CreateBookDto) {
-            return this.booksService.updateData(Number(id), createBookDto);
-    }
+  // menyimpan data
+  @Post()
+  async simpanData(@Body() createBookDto: CreateBookDto): Promise<Book> {
+    return await this.booksService.simpanData(createBookDto);
+  }
 
-    //menghapus data
-    @Delete(':id')
-    hapusdata(
-        @Param('id') id: string,
-        @Body() createBookDto: CreateBookDto){
-        return this.booksService.hapusdata(parseInt(id), createBookDto);
-    }
+  // // mengupdate data
+  // @Put(':id')
+  // updateData(@Param('id') id: string, @Body() createBookDto: CreateBookDto) {
+  //   return this.booksService.updateData(Number(id), createBookDto);
+  // }
 
+  // // menghapus data
+  // @Delete(':id')
+  // hapusdata(@Param('id') id: string) {
+  //   return this.booksService.hapusdata(parseInt(id));
+  // }
 }
