@@ -1,6 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,9 +15,8 @@ export class User {
   password: string;
 
   @Column({ type: 'varchar', nullable: true })
-resetToken: string | null;
+  resetToken: string | null;
 
-@Column({ type: 'timestamp', nullable: true })
-resetTokenExpiry: Date | null;
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExpiry: Date | null;
 }
-

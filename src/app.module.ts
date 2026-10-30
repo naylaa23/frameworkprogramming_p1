@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Joi from 'joi';
 import { LogMiddlewareMiddleware } from './middleware/log-middleware/log-middleware.middleware.js';
+import { UsersModule } from './users/users.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
 
 @Module({
   imports: [
@@ -40,7 +42,11 @@ import { LogMiddlewareMiddleware } from './middleware/log-middleware/log-middlew
 
         synchronize: ConfigService.get<string>('NODE_ENV' ) === 'development'
       })
-    })
+    }),
+
+    UsersModule,
+
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],
