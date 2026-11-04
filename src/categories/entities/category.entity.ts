@@ -3,6 +3,7 @@ import { Book } from "../../books/entitas/book-entity.js";
 
 @Entity({name:'categories'})
 export class Category{
+    
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -10,17 +11,13 @@ export class Category{
     nama: string;
 
     // satu kategori mempunyai banyak buku one to many 
-    @OneToMany(() => Book, (item) => item.id,{
-        cascade:true
-    })
+    @OneToMany(() => Book, (item) => item.category)
     books: Book[]
 
     @CreateDateColumn({name: 'created_at'})
     createdAt: Date;
 
     @UpdateDateColumn({name: 'updated_at'})
-    updateAt: Date;
-
-
+    updatedAt: Date;
 
 }

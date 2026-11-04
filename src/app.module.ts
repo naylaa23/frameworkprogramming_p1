@@ -9,10 +9,18 @@ import Joi from 'joi';
 import { LogMiddlewareMiddleware } from './middleware/log-middleware/log-middleware.middleware.js';
 import { UsersModule } from './users/users.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
+import { CustomersModule } from './customers/customers.module.js';
+import { CustomersAddressesModule } from './customers_addresses/customers_addresses.module.js';
+import { PublishersModule } from './publishers/publishers.module.js';
+import { AuthorsModule } from './authors/authors.module.js';
+import { BookAuthorsModule } from './book_authors/book_authors.module.js';
+import { OrdersModule } from './orders/orders.module.js';
+import { OrdersItemsModule } from './orders_items/orders_items.module.js';
+import { PaymentsModule } from './payments/payments.module.js';
+import { ShipmentsModule } from './shipments/shipments.module.js';
 
 @Module({
   imports: [
-    // (1) DIHAPUS: TypeOrmModule.forRoot({ type: 'mysql', ... }) karena koneksinya dobel
     BooksModule,
     AuthModule,
     ConfigModule.forRoot({
@@ -21,32 +29,50 @@ import { CategoriesModule } from './categories/categories.module.js';
         PORT: Joi.number().default(3000),
         NODE_ENV: Joi.string().valid('development','staging','production').default('development'),
         DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.number().default(3306), // (2) 5432 -> 3306
+        DB_PORT: Joi.number().default(5432),
         DB_USERNAME:Joi.string().required(),
-        DB_PASSWORD:Joi.string().allow('').required(), // (3) boleh kosong
+        DB_PASSWORD:Joi.string().allow('').required(),
         DB_DATABASE:Joi.string().required(),
       })
     }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (ConfigService: ConfigService) => ({
-        type:'mysql', // (4a) postgres -> mysql
-        host: ConfigService.get<string>('DB_HOST'), // (4b) DB_USERNAME -> DB_HOST
-        port: ConfigService.get<number>('DB_PORT'),
-        username: ConfigService.get<string>('DB_USERNAME'),
-        password: ConfigService.get<string>('DB_PASSWORD'),
-        database: ConfigService.get<string>('DB_DATABASE'),
+      useFactory: (config: ConfigService) => ({
+        type:'postgres',
+        host: config.get<string>('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_DATABASE'),
 
         autoLoadEntities: true,
 
-        synchronize: ConfigService.get<string>('NODE_ENV' ) === 'development'
+        synchronize: config.get<string>('NODE_ENV') === 'development'
       })
     }),
 
     UsersModule,
 
-    CategoriesModule
+    CategoriesModule,
+
+    CustomersModule,
+
+    CustomersAddressesModule,
+
+    PublishersModule,
+
+    AuthorsModule,
+
+    BookAuthorsModule,
+
+    OrdersModule,
+
+    OrdersItemsModule,
+
+    PaymentsModule,
+
+    ShipmentsModule
   ],
   controllers: [AppController],
   providers: [AppService],
